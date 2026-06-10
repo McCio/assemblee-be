@@ -1,0 +1,55 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v8.2.0
+
+      - name: Fetch data
+        run: uv run fetch.py
+
+      - name: Normalise
+        run: uv run normalize.py
+
+      - name: Build dashboard
+        run: uv run build_dashboard.py
+
+      - name: Collect site
+        run: |
+          mkdir site
+          cp dashboard.html site/
+          cp -r vendor/ site/vendor/
+          cp -r data/ site/data/
+          cp -r normalized/ site/normalized/
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v5
+        id: deployment

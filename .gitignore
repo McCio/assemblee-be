@@ -1,0 +1,8 @@
+data/
+normalized/
+.cache/
+dashboard.html
+vendor/
+__pycache__/
+*.pyc
+.DS_Store
