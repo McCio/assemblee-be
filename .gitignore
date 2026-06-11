@@ -1,5 +1,6 @@
 data/
 normalized/
+csv/
 .cache/
 dashboard.html
 vendor/

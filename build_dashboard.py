@@ -131,7 +131,7 @@ body{{font-family:system-ui,sans-serif;background:#f5f5f5;color:#222;padding:24p
 h1{{font-size:1.4rem}}
 .toolbar{{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}}
 .toolbar label{{font-weight:600;font-size:.9rem}}
-  .swap-btn{{display:inline-flex;align-items:center;justify-content:center;background:none;border:1px solid #ccc;border-radius:6px;width:2rem;height:2rem;padding:0;cursor:pointer;font-size:1rem;line-height:1;color:#555;transition:background .15s;vertical-align:middle;flex-shrink:0}}.swap-btn:hover{{background:#eee}}.swap-btn>span,.clear-badge>span{{transform:translateY(-1px)}}
+  .arrow-sep{{font-size:.9rem;font-weight:700;color:var(--c-mid);flex-shrink:0;opacity:.7;letter-spacing:.04em}}.clear-badge>span{{transform:translateY(-1px)}}
 select{{padding:5px 8px;font-size:.95rem;border-radius:6px;border:1px solid #ccc;background:#fff}}
 .pill{{padding:5px 14px;border-radius:20px;border:1px solid #ccc;cursor:pointer;font-size:.83rem;background:#fff;user-select:none}}
 .pill.on{{background:var(--c-dark);color:#fff;border-color:var(--c-dark)}}
@@ -173,6 +173,9 @@ tr.pie-hover td{{background:color-mix(in srgb,var(--c-dark) 8%,transparent)}}
 .pie-item{{flex:1;min-width:200px;max-width:380px;text-align:center}}
 .pie-canvas-wrap{{position:relative;height:260px}}
 .pie-label{{font-size:.78rem;color:#666;margin-bottom:4px}}
+footer{{margin-top:32px;padding:16px 0;border-top:1px solid #e0e0e0;font-size:.8rem;color:#888;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}}
+footer a{{color:var(--c-mid);text-decoration:none}}footer a:hover{{text-decoration:underline}}
+.made-by{{color:#555}}
 </style>
 </head>
 <body>
@@ -190,7 +193,7 @@ tr.pie-hover td{{background:color-mix(in srgb,var(--c-dark) 8%,transparent)}}
 </div>
 <div class="toolbar">
   <label id="label-anno-a">Anno A <select id="selA"></select></label>
-  <button class="swap-btn" id="swap-btn" onclick="swapYears()"><span>⇄</span></button>
+  <span class="arrow-sep">→</span>
   <label id="label-anno-b">Anno B <select id="selB"></select></label>
   <span id="pill-genre"     class="pill on" onclick="togglePill('genre')">Donne/Uomini</span>
   <span id="pill-tipologia" class="pill on" onclick="togglePill('tipologia')">Pers. fisiche/giuridiche</span>
@@ -219,6 +222,15 @@ tr.pie-hover td{{background:color-mix(in srgb,var(--c-dark) 8%,transparent)}}
   </div>
   <div class="chart-wrap" style="height:240px"><canvas id="prog-chart"></canvas></div>
 </div>
+
+<footer>
+  <div style="display:flex;flex-direction:column;gap:3px">
+    <span><span id="footer-fonte-label">Fonte</span>: <a href="https://www.bancaetica.it/archivio-assemblee/" target="_blank" rel="noopener">Archivio Assemblee — Banca Etica</a></span>
+    <span><span id="footer-dati-label">Dati</span>: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></span>
+    <span><span id="footer-codice-label">Codice</span>: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0</a></span>
+  </div>
+  <span class="made-by" id="footer-made-by">Fatto con ♥️ da Marco Ciotola 🧠 con Claude 🤖</span>
+</footer>
 
 <script>
 const RAW    = {data_js};
@@ -332,8 +344,11 @@ function applyLang() {{
   document.getElementById('zone-card-title').textContent = t('zone_geografiche');
   document.getElementById('provinceToggle').textContent  = provincesHidden ? t('mostra_province') : t('nascondi_province');
   document.getElementById('zone-search').placeholder    = t('cerca_provincia');
-  document.getElementById('swap-btn').title             = t('scambia_anni');
   document.getElementById('prog-title').textContent     = t('progressione_annuale');
+  document.getElementById('footer-fonte-label').textContent = t('footer_fonte');
+  document.getElementById('footer-dati-label').textContent    = t('footer_dati');
+  document.getElementById('footer-codice-label').textContent  = t('footer_codice');
+  document.getElementById('footer-made-by').textContent     = t('footer_fatto_con');
   document.querySelectorAll('[data-prog]').forEach(p => {{
     p.textContent = t('metric_' + p.dataset.prog);
   }});
@@ -368,10 +383,6 @@ selB.value = KEYS[KEYS.length - 1];
 updateSelOptions();
 selA.addEventListener('change', () => {{ updateSelOptions(); render(); }});
 selB.addEventListener('change', () => {{ updateSelOptions(); render(); }});
-function swapYears() {{
-  const tmp=selA.value; selA.value=selB.value; selB.value=tmp;
-  updateSelOptions(); render();
-}}
 
 // ── utilities ──────────────────────────────────────────────────────────────
 function fmt(v) {{ return v == null ? '–' : v.toLocaleString('it-IT'); }}
