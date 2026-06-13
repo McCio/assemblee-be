@@ -9,10 +9,13 @@ import json5
 import time
 import requests
 import requests_cache
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 from pathlib import Path
 
-requests_cache.install_cache(".cache/http", backend="filesystem")
+session = requests_cache.CachedSession(".cache/http", backend="filesystem")
+session.mount("https://", HTTPAdapter(max_retries=Retry(total=3, backoff_factor=2, status_forcelist=[502, 503, 504])))
 
 BASE = "https://www.bancaetica.it"
 ARCHIVE = f"{BASE}/archivio-assemblee/"
@@ -29,7 +32,7 @@ def get_all_risultati_links():
     page = 1
     while True:
         url = ARCHIVE if page == 1 else f"{ARCHIVE}?paged={page}"
-        r = requests.get(url)
+        r = session.get(url)
         r.raise_for_status()
         soup = BeautifulSoup(r.text, "html.parser")
         found = soup.find_all("a", string=re.compile(r"Risultati", re.I))
@@ -192,7 +195,7 @@ def main():
     links = get_all_risultati_links()
     print(f"\nTotal: {len(links)} assemblee\n")
     for url in links:
-        r = requests.get(url)
+        r = session.get(url)
         r.raise_for_status()
         year, month = parse_date(url, r.text)
         out = DATA / f"{year}.{month:02d}.json"

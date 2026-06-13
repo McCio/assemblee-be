@@ -185,7 +185,7 @@ def build():
   --sticky-filter-h: 0px;
 }}
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{font-family:system-ui,sans-serif;background:#f5f5f5;color:#222;padding:24px}}
+body{{font-family:system-ui,sans-serif;background:#f5f5f5;color:#222;padding:24px;max-width:1400px;margin:0 auto}}
 .title-bar{{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}}
 h1{{font-size:1.4rem}}
 .toolbar{{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}}
@@ -226,15 +226,15 @@ td.num{{text-align:right;font-variant-numeric:tabular-nums}}
 tr.pie-hover td{{background:color-mix(in srgb,var(--c-dark) 8%,transparent)}}
 .clear-badge{{font-size:.7rem;background:#e44;color:#fff;border-radius:10px;padding:1px 6px;margin-left:6px;cursor:pointer;display:inline-flex;align-items:center;vertical-align:middle}}
 .zone-controls{{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}}
-.toggle-btn{{padding:4px 12px;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:.82rem;background:#f5f5f5}}
+
 .zone-search{{padding:4px 8px;border:1px solid #ccc;border-radius:6px;font-size:.82rem;width:180px}}
 .sel-label{{font-size:.85rem;color:var(--c-dark);font-weight:600;padding:4px 8px;background:color-mix(in srgb,var(--c-dark) 8%,transparent);border-radius:6px;display:inline-flex;align-items:center}}
-.cats{{display:grid;gap:16px}}
+.cats{{display:grid;gap:16px}}.cats>.card{{min-width:0}}
 .zone-unavail{{color:#aaa;font-style:italic;font-size:.85rem;padding:8px}}
 .prog-controls{{display:flex;gap:8px;align-items:center;margin-bottom:10px;font-size:.85rem}}
 .lang-bar{{display:flex;gap:4px;align-items:center;flex-wrap:wrap}}
-.pie-wrap{{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:4px}}
-.pie-item{{flex:1;min-width:200px;max-width:380px;text-align:center}}
+.pie-wrap{{display:flex;gap:24px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:4px}}
+.pie-item{{flex:1 1 240px;min-width:220px;max-width:380px;text-align:center}}
 .pie-canvas-wrap{{position:relative;height:260px}}
 .pie-label{{font-size:.78rem;color:#666;margin-bottom:4px}}
 footer{{margin-top:32px;padding:16px 0;border-top:1px solid #e0e0e0;font-size:.8rem;color:#888;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}}
@@ -259,6 +259,7 @@ footer a{{color:var(--c-mid);text-decoration:none}}footer a:hover{{text-decorati
   <span id="pill-genre"     class="pill on" onclick="togglePill('genre')">Donne/Uomini</span>
   <span id="pill-tipologia" class="pill on" onclick="togglePill('tipologia')">Pers. fisiche/giuridiche</span>
   <span id="pill-mode"      class="pill on" onclick="togglePill('mode')">Presenza/Distanza</span>
+  <span id="sel-label" class="sel-label" style="display:none"></span>
 </div>
 <div class="card" id="prog-card">
   <h2 id="prog-title">Progressione annuale</h2>
@@ -281,9 +282,8 @@ footer a{{color:var(--c-mid);text-decoration:none}}footer a:hover{{text-decorati
 <div class="card" id="zone-card">
   <h2 id="zone-card-title">Zone geografiche</h2>
   <div class="zone-controls">
-    <button class="toggle-btn" id="provinceToggle" onclick="toggleProvinces()">Mostra province</button>
+    <span class="pill" id="provinceToggle" onclick="toggleProvinces()">Mostra province</span>
     <input class="zone-search" id="zone-search" type="text" placeholder="Cerca provincia…" oninput="renderZones()" style="display:none">
-    <span id="sel-label" class="sel-label" style="display:none"></span>
   </div>
   <div id="zones-content"></div>
 </div>
@@ -353,10 +353,10 @@ let LANG = 'it';
 
 const PIE_PALETTE = ['#003087','#00a8cc','#00c87a','#ffb300','#cc2244','#7c3aed','#0e7490','#059669','#d97706','#dc2626','#7c3aed','#0284c7'];
 function pieColors(n) {{ return Array.from({{length:n}},(_,i)=>PIE_PALETTE[i%PIE_PALETTE.length]); }}
-function makePieChart(id, labels, data, baseId) {{
+function makePieChart(id, labels, data, baseId, genderParity=false) {{
   destroyChart(id);
   const el=document.getElementById(`chart-${{id}}`); if (!el) return;
-  charts[id]=new Chart(el.getContext('2d'),{{type:'pie',data:{{labels,datasets:[{{data,backgroundColor:pieColors(labels.length)}}]}},options:{{responsive:true,maintainAspectRatio:false,
+  charts[id]=new Chart(el.getContext('2d'),{{type:'pie',plugins:[genderParityPiePlugin],data:{{labels,datasets:[{{data,backgroundColor:pieColors(labels.length)}}]}},options:{{responsive:true,maintainAspectRatio:false,
     onHover:(evt,els)=>{{if(baseId)setPieHover(baseId,els.length?els[0].index:-1);}},
     plugins:{{
       legend:{{display:false}},
@@ -366,6 +366,7 @@ function makePieChart(id, labels, data, baseId) {{
         return ` ${{ctx.label}}: ${{ctx.parsed}} (${{pct}}%)`;
       }}}}}},
     }}}}}});
+  if (genderParity) charts[id]._genderParityPie=true;
 }}
 function pieHtml(id, lA, lB) {{
   return `<div class="pie-wrap"><div class="pie-item"><div class="pie-label">${{lA}}</div><div class="pie-canvas-wrap"><canvas id="chart-${{id}}-a"></canvas></div></div><div class="pie-item"><div class="pie-label">${{lB}}</div><div class="pie-canvas-wrap"><canvas id="chart-${{id}}-b"></canvas></div></div></div>`;
@@ -567,6 +568,7 @@ function applyState(params) {{
   }}
   if (params.sel&&params.sel!=='none') restoreSelFromKey(params.sel);
   else sel={{type:'none'}};
+  syncProgPills();
 }}
 
 // ── selection helpers ───────────────────────────────────────────────────────
@@ -626,6 +628,7 @@ function clearSel() {{ sel = {{type:'none'}}; pushState(); render(); }}
 function togglePill(key) {{
   fieldToggles[key] = !fieldToggles[key];
   document.getElementById('pill-'+key).classList.toggle('on', fieldToggles[key]);
+  syncProgPills();
   pushState();
   render();
 }}
@@ -642,6 +645,30 @@ function toggleProgMetric(key) {{
   }});
   pushState();
   renderProgression();
+}}
+
+// ── sync prog metric pills with top filter state ────────────────────────────
+function syncProgPills() {{
+  const COND = {{
+    soci: fieldToggles.genre || fieldToggles.tipologia,
+    mode: fieldToggles.mode,
+  }};
+  let changed = false;
+  for (const [metric, active] of Object.entries(COND)) {{
+    const pill = document.querySelector(`[data-prog="${{metric}}"]`);
+    if (!pill) continue;
+    pill.style.display = active ? '' : 'none';
+    if (!active && progMetrics.has(metric)) {{
+      progMetrics.delete(metric);
+      pill.classList.remove('on');
+      changed = true;
+    }}
+  }}
+  if (changed && progMetrics.size === 0) {{
+    progMetrics.add('votanti');
+    const vp = document.querySelector('[data-prog="votanti"]');
+    if (vp) vp.classList.add('on');
+  }}
 }}
 
 // ── province toggle ─────────────────────────────────────────────────────────
@@ -712,18 +739,28 @@ function zoneHeaders(lA, lB, showA, showB) {{
   return row1+row2+row3;
 }}
 
-function yCols(z,show,isB) {{
+function yCols(z,show,isB,totRow) {{
   const s=isB?' grp-sep':'';
-  const vot=`<td class="num${{s}} col-tot">${{fmt(z.votanti??null)}}</td>`;
+  const _pct=(val,tot)=>val!=null&&tot>0?Math.round(val/tot*100):null;
+  const _bar=(val,tot)=>{{const p=_pct(val,tot);return p!=null?`<div style="margin-top:2px;height:4px;border-radius:2px;background:rgba(0,48,135,.35);width:${{p}}%;min-width:1px"></div>`:'';}};
+  const _td=(cls,val,tot,lbl)=>{{const p=_pct(val,tot);const tip=p!=null?` title="${{p}}% ${{lbl}}"`:'' ;return `<td class="num${{cls}}"${{tip}}>${{fmt(val)}}${{_bar(val,tot)}}</td>`;}};
+  const v=z.votanti??null;
+  const vot=_td(`${{s}} col-tot`,v,totRow?.votanti,t('totale'));
   let fCells='';
   if (show.fisiche) {{
-    if (fieldToggles.genre) fCells=`<td class="num">${{fmt(z.donne??null)}}</td><td class="num">${{fmt(uomini(z))}}</td>`;
-    else fCells=`<td class="num">${{fmt(z.persone_fisiche??null)}}</td>`;
+    if (fieldToggles.genre) {{
+      const d=z.donne??null,u=uomini(z);
+      fCells=_td('',d,totRow?.donne,t('donne'))+_td('',u,totRow?.uomini,t('uomini'));
+    }} else {{
+      const pf=z.persone_fisiche??null;
+      fCells=_td('',pf,totRow?.persone_fisiche,t('persone_fisiche_abbr'));
+    }}
   }}
-  const gCells=show.giuridiche?`<td class="num">${{fmt(z.persone_giuridiche??null)}}</td>`:'';
+  const pg=z.persone_giuridiche??null;
+  const gCells=show.giuridiche?_td('',pg,totRow?.persone_giuridiche,t('persone_giuridiche_abbr')):'';
   return vot+fCells+gCells;
 }}
-function zoneRow(n, zA, zB, cls, showA, showB, clickArgs) {{
+function zoneRow(n, zA, zB, cls, showA, showB, clickArgs, totA, totB) {{
   const a=zA||{{}}, b=zB||{{}};
   const av=a.votanti??null, bv=b.votanti??null;
   const d=(av!=null&&bv!=null)?bv-av:null;
@@ -733,9 +770,9 @@ function zoneRow(n, zA, zB, cls, showA, showB, clickArgs) {{
   const onClick=clickArgs?` onclick="handleRowClick('${{clickArgs.split(':')[0]}}','${{clickArgs.split(':').slice(1).join(':')}}')"` :'';
   const clickable=clickArgs?' clickable':'';
   const clearBadge=isSelected?`<span class="clear-badge" onclick="event.stopPropagation();clearSel()"><span>×</span></span>`:'';
-  return `<tr class="${{cls}}${{selCls}}${{clickable}}"${{onClick}}><td>${{n}}${{clearBadge}}</td>${{yCols(a,showA,false)}}${{yCols(b,showB,true)}}<td class="num grp-sep ${{diffClass(d)}}">${{fmtDiff(d)}}</td><td class="num ${{diffClass(p)}}">${{fmtPct(p)}}</td></tr>`;
+  return `<tr class="${{cls}}${{selCls}}${{clickable}}"${{onClick}}><td>${{n}}${{clearBadge}}</td>${{yCols(a,showA,false,totA)}}${{yCols(b,showB,true,totB)}}<td class="num grp-sep ${{diffClass(d)}}">${{fmtDiff(d)}}</td><td class="num ${{diffClass(p)}}">${{fmtPct(p)}}</td></tr>`;
 }}
-function sectionDataRow(label, zA, zB, showA, showB, clickArgs, bgColor=C_DARK) {{
+function sectionDataRow(label, zA, zB, showA, showB, clickArgs, bgColor=C_DARK, totA, totB) {{
   const a=zA||{{}}, b=zB||{{}};
   const av=a.votanti??null, bv=b.votanti??null;
   const d=(av!=null&&bv!=null)?bv-av:null;
@@ -749,7 +786,7 @@ function sectionDataRow(label, zA, zB, showA, showB, clickArgs, bgColor=C_DARK) 
   const dCol=d==null?neuCol:d>0?posCol:negCol;
   const pCol=p==null?neuCol:p>0?posCol:negCol;
   const txtColor=onDark?'#fff':C_DARK;
-  return `<tr style="background:${{bgColor}};color:${{txtColor}};font-weight:700;cursor:pointer;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em"${{onClick}}${{selCls?` class="${{selCls}}"`:''}}><td style="padding:5px 8px">${{label}}${{clearBadge}}</td>${{yCols(a,showA,false)}}${{yCols(b,showB,true)}}<td class="num grp-sep" style="color:${{dCol}}">${{fmtDiff(d)}}</td><td class="num" style="color:${{pCol}}">${{fmtPct(p)}}</td></tr>`;
+  return `<tr style="background:${{bgColor}};color:${{txtColor}};font-weight:700;cursor:pointer;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em"${{onClick}}${{selCls?` class="${{selCls}}"`:''}}><td style="padding:5px 8px">${{label}}${{clearBadge}}</td>${{yCols(a,showA,false,totA)}}${{yCols(b,showB,true,totB)}}<td class="num grp-sep" style="color:${{dCol}}">${{fmtDiff(d)}}</td><td class="num" style="color:${{pCol}}">${{fmtPct(p)}}</td></tr>`;
 }}
 
 function renderZones() {{
@@ -773,31 +810,33 @@ function renderZones() {{
   const allZonesB={{...(itB||{{}}),...(esB||{{}})}};
   const geoTotA=(geoA.italia??null)!=null||(geoA.spagna??null)!=null ? (geoA.italia??0)+(geoA.spagna??0) : null;
   const geoTotB=(geoB.italia??null)!=null||(geoB.spagna??null)!=null ? (geoB.italia??0)+(geoB.spagna??0) : null;
-  rows+=sectionDataRow(t('totale'),withGeoVot(sumZones(allZonesA,Object.keys(allZonesA)),geoTotA),withGeoVot(sumZones(allZonesB,Object.keys(allZonesB)),geoTotB),showA,showB,'clear:');
+  const totA=withGeoVot(sumZones(allZonesA,Object.keys(allZonesA)),geoTotA);
+  const totB=withGeoVot(sumZones(allZonesB,Object.keys(allZonesB)),geoTotB);
+  rows+=sectionDataRow(t('totale'),totA,totB,showA,showB,'clear:',C_DARK,totA,totB);
 
   if (itA||itB||geoA.italia!=null||geoB.italia!=null) {{
     const allIt=[...new Set([...Object.keys(itA||{{}}), ...Object.keys(itB||{{}})])];
-    rows+=sectionDataRow(t('italia'),withGeoVot(sumZones({{...itA}},allIt.filter(n=>itA&&n in itA)),geoA.italia??null),withGeoVot(sumZones({{...itB}},allIt.filter(n=>itB&&n in itB)),geoB.italia??null),showA,showB,'it-total:',COLOR_B);
+    rows+=sectionDataRow(t('italia'),withGeoVot(sumZones({{...itA}},allIt.filter(n=>itA&&n in itA)),geoA.italia??null),withGeoVot(sumZones({{...itB}},allIt.filter(n=>itB&&n in itB)),geoB.italia??null),showA,showB,'it-total:',COLOR_B,totA,totB);
     for (const area of AREA_ORDER) {{
       const an=allIt.filter(n=>PROVINCE_AREA[n]===area); if (!an.length) continue;
       const fn=filter?an.filter(n=>n.toLowerCase().includes(filter)):an;
       if (filter&&!fn.length) continue;
-      rows+=zoneRow(area,sumZones(itA||{{}},an.filter(n=>itA&&n in itA)),sumZones(itB||{{}},an.filter(n=>itB&&n in itB)),'area-row',showA,showB,`area:${{area}}`);
-      for (const n of fn.sort()) rows+=zoneRow(n,(itA||{{}})[n]||null,(itB||{{}})[n]||null,'province-row',showA,showB,`province:${{n}}`);
+      rows+=zoneRow(area,sumZones(itA||{{}},an.filter(n=>itA&&n in itA)),sumZones(itB||{{}},an.filter(n=>itB&&n in itB)),'area-row',showA,showB,`area:${{area}}`,totA,totB);
+      for (const n of fn.sort()) rows+=zoneRow(n,(itA||{{}})[n]||null,(itB||{{}})[n]||null,'province-row',showA,showB,`province:${{n}}`,totA,totB);
     }}
   }}
   if (esA||esB||geoA.spagna!=null||geoB.spagna!=null) {{
     const allEs=[...new Set([...Object.keys(esA||{{}}), ...Object.keys(esB||{{}})])].sort();
-    rows+=sectionDataRow(t('spagna_fiare'),withGeoVot(sumZones(esA||{{}},Object.keys(esA||{{}})),geoA.spagna??null),withGeoVot(sumZones(esB||{{}},Object.keys(esB||{{}})),geoB.spagna??null),showA,showB,'es-total:',COLOR_B);
-    for (const n of allEs) rows+=zoneRow(n,(esA||{{}})[n]||null,(esB||{{}})[n]||null,'province-row',showA,showB,`fiare:${{n}}`);
+    rows+=sectionDataRow(t('spagna_fiare'),withGeoVot(sumZones(esA||{{}},Object.keys(esA||{{}})),geoA.spagna??null),withGeoVot(sumZones(esB||{{}},Object.keys(esB||{{}})),geoB.spagna??null),showA,showB,'es-total:',COLOR_B,totA,totB);
+    for (const n of allEs) rows+=zoneRow(n,(esA||{{}})[n]||null,(esB||{{}})[n]||null,'province-row',showA,showB,`fiare:${{n}}`,totA,totB);
   }}
   const estA=(RAW[kA]||{{}}).geography?.estero??null;
   const estB=(RAW[kB]||{{}}).geography?.estero??null;
   if (estA!=null||estB!=null) {{
-    rows+=sectionDataRow(t('estero'),{{votanti:estA}},{{votanti:estB}},showA,showB,null,COLOR_B);
+    rows+=sectionDataRow(t('estero'),{{votanti:estA}},{{votanti:estB}},showA,showB,null,COLOR_B,totA,totB);
   }}
 
-  content.innerHTML=`<table class="zone-table" id="zone-table-main"><thead>${{headers}}</thead><tbody>${{rows}}</tbody></table>`;
+  content.innerHTML=`<div style="overflow-x:auto"><table class="zone-table" id="zone-table-main"><thead>${{headers}}</thead><tbody>${{rows}}</tbody></table></div>`;
   if (provincesHidden) document.getElementById('zone-table-main').classList.add('hide-provinces');
 }}
 
@@ -828,20 +867,25 @@ function renderTotal(section) {{
     if (valsA.every(v=>v==null)&&valsB.every(v=>v==null)) return;
     const fieldLabels=fieldKeys.map(k=>t(k));
     const card=document.createElement('div'); card.className='card';
+    const totA=valsA.reduce((s,v)=>s+(v??0),0);
+    const totB=valsB.reduce((s,v)=>s+(v??0),0);
     const rows=fieldKeys.map((k,i)=>{{
       const a=valsA[i],b=valsB[i];
       const diff=(a!=null&&b!=null)?b-a:null;
       const pct=(a!=null&&b!=null&&a!==0)?(b-a)/a*100:null;
       const ph=chartMode==='pie'?` data-chart-id="${{catId}}" data-pie-idx="${{i}}" onmouseenter="setPieHover('${{catId}}',${{i}})"`:'';
-      return `<tr${{ph}}><td>${{pieSwatch(i)}}${{t(k)}}</td><td class="num">${{fmt(a)}}</td><td class="num grp-sep">${{fmt(b)}}</td><td class="num grp-sep ${{diffClass(diff)}}">${{fmtDiff(diff)}}</td><td class="num ${{diffClass(pct)}}">${{fmtPct(pct)}}</td></tr>`;
+      const shA=a!=null&&totA>0?`<div style="font-size:.72em;color:#999;line-height:1">${{(a/totA*100).toFixed(1)}}%</div>`:'';
+      const shB=b!=null&&totB>0?`<div style="font-size:.72em;color:#999;line-height:1">${{(b/totB*100).toFixed(1)}}%</div>`:'';
+      return `<tr${{ph}}><td>${{pieSwatch(i)}}${{t(k)}}</td><td class="num">${{fmt(a)}}${{shA}}</td><td class="num grp-sep">${{fmt(b)}}${{shB}}</td><td class="num grp-sep ${{diffClass(diff)}}">${{fmtDiff(diff)}}</td><td class="num ${{diffClass(pct)}}">${{fmtPct(pct)}}</td></tr>`;
     }}).join('');
     const many=fieldKeys.length>=5;
     const tbl=`<table${{chartMode==='pie'?` onmouseleave="setPieHover('${{catId}}',-1)"`:''}}><thead><tr><th>${{catLabel}}</th><th class="num">${{lA}}</th><th class="num grp-sep">${{lB}}</th><th class="num grp-sep">${{t('diff_ass')}}</th><th class="num">${{t('diff_pct')}}</th></tr></thead><tbody>${{rows}}</tbody></table>`;
+    const isGenre=catId==='genre';
     if (chartMode==='pie') {{
       card.innerHTML=`<h2>${{catLabel}}</h2>${{pieHtml(catId,lA,lB)}}<div style="margin-top:12px;overflow-x:auto">${{tbl}}</div>`;
       container.appendChild(card);
-      makePieChart(catId+'-a', fieldLabels, valsA, catId);
-      makePieChart(catId+'-b', fieldLabels, valsB, catId);
+      makePieChart(catId+'-a', fieldLabels, valsA, catId, isGenre);
+      makePieChart(catId+'-b', fieldLabels, valsB, catId, isGenre);
     }} else {{
       card.innerHTML=`<h2>${{catLabel}}</h2>${{many
         ?`<div class="chart-wrap"><canvas id="chart-${{catId}}"></canvas></div><div style="margin-top:12px;overflow-x:auto">${{tbl}}</div>`
@@ -850,10 +894,14 @@ function renderTotal(section) {{
       container.appendChild(card);
       destroyChart(catId);
       const ctx=document.getElementById(`chart-${{catId}}`).getContext('2d');
-      charts[catId]=new Chart(ctx,{{type:'bar',data:{{labels:fieldLabels,datasets:[
+      charts[catId]=new Chart(ctx,{{type:'bar',plugins:isGenre?[genderParityPlugin]:[],data:{{labels:fieldLabels,datasets:[
         {{label:lA,data:valsA,backgroundColor:COLOR_A,borderColor:BORDER_A,borderWidth:1}},
         {{label:lB,data:valsB,backgroundColor:COLOR_B,borderColor:BORDER_B,borderWidth:1}},
       ]}},options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:true,position:'top'}}}},scales:{{y:{{beginAtZero:true}}}}}}}});
+      if (isGenre) charts[catId]._genderParityLines=[
+        {{value:totA>0?totA/2:null,color:rgba(C_DARK,.5)}},
+        {{value:totB>0?totB/2:null,color:rgba(C_LIGHT,.9)}},
+      ].filter(l=>l.value!=null);
     }}
   }});
 }}
@@ -886,12 +934,16 @@ function renderGroup(section) {{
     if (valsA.every(v=>v==null)&&valsB.every(v=>v==null)) return;
     const card=document.createElement('div'); card.className='card';
     const chartId=`grp-${{fieldKey}}`;
+    const totA=valsA.reduce((s,v)=>s+(v??0),0);
+    const totB=valsB.reduce((s,v)=>s+(v??0),0);
     const rows=children.map((c,i)=>{{
       const a=valsA[i],b=valsB[i];
       const diff=(a!=null&&b!=null)?b-a:null;
       const pct=(a!=null&&b!=null&&a!==0)?(b-a)/a*100:null;
       const ph=chartMode==='pie'?` data-chart-id="${{chartId}}" data-pie-idx="${{i}}" onmouseenter="setPieHover('${{chartId}}',${{i}})"`:'';
-      return `<tr${{ph}}><td>${{pieSwatch(i)}}${{c}}</td><td class="num">${{fmt(a)}}</td><td class="num grp-sep">${{fmt(b)}}</td><td class="num grp-sep ${{diffClass(diff)}}">${{fmtDiff(diff)}}</td><td class="num ${{diffClass(pct)}}">${{fmtPct(pct)}}</td></tr>`;
+      const shA=a!=null&&totA>0?`<div style="font-size:.72em;color:#999;line-height:1">${{(a/totA*100).toFixed(1)}}%</div>`:'';
+      const shB=b!=null&&totB>0?`<div style="font-size:.72em;color:#999;line-height:1">${{(b/totB*100).toFixed(1)}}%</div>`:'';
+      return `<tr${{ph}}><td>${{pieSwatch(i)}}${{c}}</td><td class="num">${{fmt(a)}}${{shA}}</td><td class="num grp-sep">${{fmt(b)}}${{shB}}</td><td class="num grp-sep ${{diffClass(diff)}}">${{fmtDiff(diff)}}</td><td class="num ${{diffClass(pct)}}">${{fmtPct(pct)}}</td></tr>`;
     }}).join('');
     const many=children.length>=5;
     const horiz=children.length>5;
@@ -941,6 +993,8 @@ function renderGroup(section) {{
     if (hasF2A) datasets.push({{label:`${{f2Label}} ${{lA}}`,data:f2A,backgroundColor:rgba(C_DARK,.42),borderColor:C_DARK,borderWidth:1}});
     if (hasF1B) datasets.push({{label:`${{f1Label}} ${{lB}}`,data:f1B,backgroundColor:rgba(C_LIGHT,.9),borderColor:rgba(C_LIGHT,.9),borderWidth:1}});
     if (hasF2B) datasets.push({{label:`${{f2Label}} ${{lB}}`,data:f2B,backgroundColor:rgba(C_LIGHT,.42),borderColor:rgba(C_LIGHT,.5),borderWidth:1}});
+    const totF1A=f1A.reduce((s,v)=>s+(v??0),0),totF1B=f1B.reduce((s,v)=>s+(v??0),0);
+    const totF2A=f2A.reduce((s,v)=>s+(v??0),0),totF2B=f2B.reduce((s,v)=>s+(v??0),0);
     const diffF1=hasF1A&&hasF1B,diffF2=hasF2A&&hasF2B;
     const colsF1=(hasF1A?1:0)+(hasF1B?1:0)+(diffF1?2:0);
     const colsF2=(hasF2A?1:0)+(hasF2B?1:0)+(diffF2?2:0);
@@ -958,11 +1012,12 @@ function renderGroup(section) {{
       const f1a=f1A[i],f1b=f1B[i],f2a=f2A[i],f2b=f2B[i];
       const d1=diffF1?f1b-f1a:null,p1=(diffF1&&f1a)?(f1b-f1a)/f1a*100:null;
       const d2=diffF2?f2b-f2a:null,p2=(diffF2&&f2a)?(f2b-f2a)/f2a*100:null;
-      const c1A=hasF1A?`<td class="num">${{fmt(f1a)}}</td>`:'';
-      const c1B=hasF1B?`<td class="num grp-sep">${{fmt(f1b)}}</td>`:'';
+      const sh=(v,tot)=>v!=null&&tot>0?`<div style="font-size:.72em;color:#999;line-height:1">${{(v/tot*100).toFixed(1)}}%</div>`:'';
+      const c1A=hasF1A?`<td class="num">${{fmt(f1a)}}${{sh(f1a,totF1A)}}</td>`:'';
+      const c1B=hasF1B?`<td class="num grp-sep">${{fmt(f1b)}}${{sh(f1b,totF1B)}}</td>`:'';
       const c1D=diffF1?`<td class="num grp-sep ${{diffClass(d1)}}">${{fmtDiff(d1)}}</td><td class="num ${{diffClass(p1)}}">${{fmtPct(p1)}}</td>`:'';
-      const c2A=hasF2A?`<td class="num grp-sep">${{fmt(f2a)}}</td>`:'';
-      const c2B=hasF2B?`<td class="num grp-sep">${{fmt(f2b)}}</td>`:'';
+      const c2A=hasF2A?`<td class="num grp-sep">${{fmt(f2a)}}${{sh(f2a,totF2A)}}</td>`:'';
+      const c2B=hasF2B?`<td class="num grp-sep">${{fmt(f2b)}}${{sh(f2b,totF2B)}}</td>`:'';
       const c2D=diffF2?`<td class="num grp-sep ${{diffClass(d2)}}">${{fmtDiff(d2)}}</td><td class="num ${{diffClass(p2)}}">${{fmtPct(p2)}}</td>`:'';
       const ph=chartMode==='pie'?` data-chart-id="${{chartId}}" data-pie-idx="${{i}}" onmouseenter="setPieHover('${{chartId}}',${{i}})"`:'';
       return `<tr${{ph}}><td>${{pieSwatch(i)}}${{c}}</td>${{c1A}}${{c1B}}${{c1D}}${{c2A}}${{c2B}}${{c2D}}</tr>`;
@@ -1035,23 +1090,28 @@ function renderLeaf(section) {{
     const catLabel=t(cat.labelKey);
     const valsA=cat.fields.map(f=>f.computed?uomini(zA):(zA[f.key]??null));
     const valsB=cat.fields.map(f=>f.computed?uomini(zB):(zB[f.key]??null));
+    const totLA=valsA.reduce((s,v)=>s+(v??0),0);
+    const totLB=valsB.reduce((s,v)=>s+(v??0),0);
     if (valsA.every(v=>v==null)&&valsB.every(v=>v==null)) return;
     const labels=cat.fields.map(f=>t(f.labelKey));
     const card=document.createElement('div'); card.className='card';
     const chartId=`leaf-${{cat.labelKey}}`;
+    const isGenreL=cat.labelKey==='cat_genere';
     const rows=cat.fields.map((f,i)=>{{
       const a=valsA[i],b=valsB[i];
       const diff=(a!=null&&b!=null)?b-a:null;
       const pct=(a!=null&&b!=null&&a!==0)?(b-a)/a*100:null;
       const ph=chartMode==='pie'?` data-chart-id="${{chartId}}" data-pie-idx="${{i}}" onmouseenter="setPieHover('${{chartId}}',${{i}})"`:'';
-      return `<tr${{ph}}><td>${{pieSwatch(i)}}${{t(f.labelKey)}}</td><td class="num">${{fmt(a)}}</td><td class="num grp-sep">${{fmt(b)}}</td><td class="num grp-sep ${{diffClass(diff)}}">${{fmtDiff(diff)}}</td><td class="num ${{diffClass(pct)}}">${{fmtPct(pct)}}</td></tr>`;
+      const shA=a!=null&&totLA>0?`<div style="font-size:.72em;color:#999;line-height:1">${{(a/totLA*100).toFixed(1)}}%</div>`:'';
+      const shB=b!=null&&totLB>0?`<div style="font-size:.72em;color:#999;line-height:1">${{(b/totLB*100).toFixed(1)}}%</div>`:'';
+      return `<tr${{ph}}><td>${{pieSwatch(i)}}${{t(f.labelKey)}}</td><td class="num">${{fmt(a)}}${{shA}}</td><td class="num grp-sep">${{fmt(b)}}${{shB}}</td><td class="num grp-sep ${{diffClass(diff)}}">${{fmtDiff(diff)}}</td><td class="num ${{diffClass(pct)}}">${{fmtPct(pct)}}</td></tr>`;
     }}).join('');
     const tblLeaf=`<table${{chartMode==='pie'?` onmouseleave="setPieHover('${{chartId}}',-1)"`:''}}><thead><tr><th>${{catLabel}}</th><th class="num">${{lA}}</th><th class="num grp-sep">${{lB}}</th><th class="num grp-sep">${{t('diff_ass')}}</th><th class="num">${{t('diff_pct')}}</th></tr></thead><tbody>${{rows}}</tbody></table>`;
     if (chartMode==='pie') {{
       card.innerHTML=`<h2>${{selDisplayLabel()}} — ${{catLabel}}</h2>${{pieHtml(chartId,lA,lB)}}<div style="margin-top:12px;overflow-x:auto">${{tblLeaf}}</div>`;
       container.appendChild(card);
-      makePieChart(chartId+'-a', labels, valsA, chartId);
-      makePieChart(chartId+'-b', labels, valsB, chartId);
+      makePieChart(chartId+'-a', labels, valsA, chartId, isGenreL);
+      makePieChart(chartId+'-b', labels, valsB, chartId, isGenreL);
     }} else {{
       card.innerHTML=`<h2>${{selDisplayLabel()}} — ${{catLabel}}</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
         <div class="chart-wrap"><canvas id="chart-${{chartId}}"></canvas></div>
@@ -1060,20 +1120,26 @@ function renderLeaf(section) {{
       container.appendChild(card);
       destroyChart(chartId);
       const ctx=document.getElementById(`chart-${{chartId}}`).getContext('2d');
-      charts[chartId]=new Chart(ctx,{{type:'bar',data:{{labels,datasets:[
+      charts[chartId]=new Chart(ctx,{{type:'bar',plugins:isGenreL?[genderParityPlugin]:[],data:{{labels,datasets:[
         {{label:lA,data:valsA,backgroundColor:COLOR_A,borderColor:BORDER_A,borderWidth:1}},
         {{label:lB,data:valsB,backgroundColor:COLOR_B,borderColor:BORDER_B,borderWidth:1}},
       ]}},options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:true,position:'top'}}}},scales:{{y:{{beginAtZero:true}}}}}}}});
+      if (isGenreL) charts[chartId]._genderParityLines=[
+        {{value:totLA>0?totLA/2:null,color:rgba(C_DARK,.5)}},
+        {{value:totLB>0?totLB/2:null,color:rgba(C_LIGHT,.9)}},
+      ].filter(l=>l.value!=null);
     }}
   }});
 }}
 
 // ── progression chart ────────────────────────────────────────────────────────
-const progVerticalLinesPlugin={{id:'progVerticalLines',afterDraw(chart){{const iA=KEYS.indexOf(selA.value),iB=KEYS.indexOf(selB.value);if(iA<0&&iB<0)return;const c=chart.ctx,xS=chart.scales.x,yS=chart.scales.y,top=yS.top,bot=yS.bottom;c.save();c.setLineDash([6,4]);c.lineWidth=2;if(iA>=0){{const px=xS.getPixelForValue(iA);c.strokeStyle=C_DARK;c.beginPath();c.moveTo(px,top);c.lineTo(px,bot);c.stroke();}}if(iB>=0){{const px=xS.getPixelForValue(iB);c.strokeStyle=C_LIGHT;c.beginPath();c.moveTo(px,top);c.lineTo(px,bot);c.stroke();}}c.restore();}}}};
+const progVerticalLinesPlugin={{id:'progVerticalLines',afterDraw(chart){{const iA=KEYS.indexOf(selA.value),iB=KEYS.indexOf(selB.value);if(iA<0&&iB<0)return;const c=chart.ctx,xS=chart.scales.x,yS=chart.scales.y;if(!xS||!yS)return;const top=yS.top,bot=yS.bottom;c.save();c.setLineDash([6,4]);c.lineWidth=2;if(iA>=0){{const px=xS.getPixelForValue(iA);c.strokeStyle=C_DARK;c.beginPath();c.moveTo(px,top);c.lineTo(px,bot);c.stroke();}}if(iB>=0){{const px=xS.getPixelForValue(iB);c.strokeStyle=C_LIGHT;c.beginPath();c.moveTo(px,top);c.lineTo(px,bot);c.stroke();}}c.restore();}}}};
+const genderParityPlugin={{id:'genderParity',afterDraw(chart){{const lines=chart._genderParityLines;if(!lines||!lines.length)return;const {{ctx,chartArea}}=chart;const y=chart.scales?.y;if(!y||!chartArea)return;ctx.save();ctx.setLineDash([5,4]);ctx.lineWidth=1.5;lines.forEach(({{value,color}})=>{{if(value==null)return;const py=y.getPixelForValue(value);if(py<chartArea.top||py>chartArea.bottom)return;ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(chartArea.left,py);ctx.lineTo(chartArea.right,py);ctx.stroke();}});ctx.restore();}}}};
+const genderParityPiePlugin={{id:'genderParityPie',afterDraw(chart){{if(!chart._genderParityPie)return;const meta=chart.getDatasetMeta(0);if(!meta||!meta.data||!meta.data[0])return;const {{ctx,chartArea}}=chart;const cx=(chartArea.left+chartArea.right)/2;const cy=meta.data[0].y;const r=meta.data[0].outerRadius;if(!r)return;ctx.save();ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(cx,cy-r);ctx.lineTo(cx,cy+r);ctx.stroke();ctx.restore();}}}};
 function hideProgPopover(){{const p=document.getElementById('prog-popover');if(p)p.style.display='none';}}
 function showProgPopover(nativeEvt,idx){{const p=document.getElementById('prog-popover');if(!p)return;const wrap=document.querySelector('.prog-wrap');if(!wrap)return;const wr=wrap.getBoundingClientRect();const x=nativeEvt.clientX-wr.left+8,y=nativeEvt.clientY-wr.top+8;p.innerHTML=`<button class="pill" onclick="popoverSetA(${{idx}})">${{t('imposta_anno_a')}}</button><button class="pill" onclick="popoverSetB(${{idx}})">${{t('imposta_anno_b')}}</button>`;p.style.cssText=`display:flex;left:${{x}}px;top:${{y}}px;position:absolute;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.15);padding:8px;z-index:200;gap:6px;flex-direction:column`;}}
-function popoverSetA(idx){{hideProgPopover();selA.value=KEYS[idx];updateSelOptions();render();}}
-function popoverSetB(idx){{hideProgPopover();selB.value=KEYS[idx];updateSelOptions();render();}}
+function popoverSetA(idx){{hideProgPopover();selA.value=KEYS[idx];updateSelOptions();pushState();render();}}
+function popoverSetB(idx){{hideProgPopover();selB.value=KEYS[idx];updateSelOptions();pushState();render();}}
 document.addEventListener('click',e=>{{const p=document.getElementById('prog-popover');if(p&&p.style.display!=='none'&&!p.contains(e.target))hideProgPopover();}});
 let progChart = null;
 function progVal(stem, metric) {{
@@ -1107,7 +1173,8 @@ const C_AMBER='rgb(210,160,0)';
 function renderProgression() {{
   const yearLabels=KEYS.map(k=>LABELS[k]);
   if (progChart) {{ progChart.destroy(); progChart=null; }}
-  const ctx=document.getElementById('prog-chart').getContext('2d');
+  const _pc=document.getElementById('prog-chart');const _ex=Chart.getChart(_pc);if(_ex)_ex.destroy();
+  const ctx=_pc.getContext('2d');
   let datasets=[];
   function splitDs(label,data,color) {{
     const n=data.length;
@@ -1161,8 +1228,8 @@ function renderProgression() {{
         if(idx<0||idx>=KEYS.length)return;
         const iA=KEYS.indexOf(selA.value),iB=KEYS.indexOf(selB.value);
         if(idx===iA||idx===iB)return;
-        if(idx<iA){{selA.value=KEYS[idx];updateSelOptions();render();return;}}
-        if(idx>iB){{selB.value=KEYS[idx];updateSelOptions();render();return;}}
+        if(idx<iA){{selA.value=KEYS[idx];updateSelOptions();pushState();render();return;}}
+        if(idx>iB){{selB.value=KEYS[idx];updateSelOptions();pushState();render();return;}}
         showProgPopover(event.native,idx);
       }},
       plugins:{{legend:{{display:true,position:'top',labels:{{filter:item=>!item.text.startsWith('_')}}}},tooltip:{{mode:'index',intersect:false,filter:item=>!item.dataset.label.startsWith('_'),callbacks:{{label:ctx=>`${{ctx.dataset.label}}: ${{fmt(ctx.raw)}}`}}}}}},
@@ -1185,6 +1252,7 @@ function render() {{
   rebuildLabels();
   const params = parseHash();
   if (params) applyState(params);
+  syncProgPills();
   applyLang();
   render();
   if (!window.location.hash) pushState();
