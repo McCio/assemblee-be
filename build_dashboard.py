@@ -13,6 +13,19 @@ VENDOR_DIR = Path("vendor")
 CHARTJS_URL = "https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"
 CHARTJS_VENDOR = VENDOR_DIR / "chart.umd.min.js"
 
+FLAGS_DIR = VENDOR_DIR / "flags"
+OPENMOJI_BASE = "https://github.com/hfg-gmuend/openmoji/raw/master/color/svg/"
+
+FLAG_FILES = {
+    "it":      ("1F1EE-1F1F9.svg", "IT"),
+    "en":      ("1F1EC-1F1E7.svg", "EN"),
+    "es-cast": ("1F1EA-1F1F8.svg", "ES"),
+    "es-cat":  ("1F3F4-E0065-E0073-E0063-E0074-E007F.svg", "CA"),
+    "es-gal":  ("1F3F4-E0065-E0073-E0067-E0061-E007F.svg", "GL"),
+    "eu":      ("1F3F4-E0065-E0073-E0070-E0076-E007F.svg", "EU"),
+    "de":      ("1F1E9-1F1EA.svg", "DE"),
+}
+
 
 def ensure_chartjs():
     if not CHARTJS_VENDOR.exists():
@@ -21,6 +34,33 @@ def ensure_chartjs():
         urllib.request.urlretrieve(CHARTJS_URL, CHARTJS_VENDOR)
         print(f"Vendored Chart.js ({CHARTJS_VENDOR.stat().st_size // 1024}KB)")
     return CHARTJS_VENDOR.read_text()
+
+
+def ensure_flags():
+    """Download OpenMoji flag SVGs if not already present. Returns dict lang -> svg_text."""
+    import re
+    FLAGS_DIR.mkdir(parents=True, exist_ok=True)
+    svgs = {}
+    for lang, (filename, label) in FLAG_FILES.items():
+        dest = FLAGS_DIR / filename
+        if not dest.exists():
+            url = OPENMOJI_BASE + filename
+            print(f"Downloading flag {filename} from OpenMoji...")
+            urllib.request.urlretrieve(url, dest)
+            print(f"  Saved {dest} ({dest.stat().st_size}B)")
+        raw = dest.read_text(encoding="utf-8")
+        if raw.startswith("<?xml"):
+            raw = raw[raw.index("<svg"):]
+        raw = raw.strip()
+        if 'width=' not in raw[:100]:
+            raw = raw.replace("<svg ", '<svg width="20" height="20" ', 1)
+        else:
+            raw = re.sub(r'width="[^"]*"', 'width="20"', raw, count=1)
+            raw = re.sub(r'height="[^"]*"', 'height="20"', raw, count=1)
+        svgs[lang] = raw
+    return svgs
+
+
 TRANSLATIONS = json.loads(Path("translations.json").read_text())
 
 MONTH_IT = {
@@ -89,8 +129,24 @@ def load_data():
     return {p.stem: json.loads(p.read_text()) for p in sorted(NORMALIZED.glob("*.json"))}
 
 
+def build_lang_pills(flag_svgs):
+    pills = []
+    order = ["it", "en", "es-cast", "es-cat", "es-gal", "eu", "de"]
+    for lang in order:
+        svg = flag_svgs.get(lang, "")
+        _, label = FLAG_FILES[lang]
+        active_class = ' on' if lang == 'it' else ''
+        pills.append(
+            f'    <span class="lang-pill{active_class}" data-lang="{lang}" '
+            f'onclick="setLang(\'{lang}\')" title="{lang}">'
+            f'{svg} {label}</span>'
+        )
+    return "\n".join(pills)
+
+
 def build():
     chartjs = ensure_chartjs()
+    flag_svgs = ensure_flags()
     data = load_data()
     keys = sorted(data.keys())
     year_counts = Counter(k.split(".")[0] for k in keys)
@@ -111,6 +167,8 @@ def build():
     ao_js       = json.dumps(AREA_ORDER, ensure_ascii=False)
     trans_js    = json.dumps(TRANSLATIONS, ensure_ascii=False)
 
+    lang_pills_html = build_lang_pills(flag_svgs)
+
     html = f"""<!DOCTYPE html>
 <html lang="it">
 <head>
@@ -124,6 +182,7 @@ def build():
   --c-light: rgb(0,200,255);
   --c-black: rgb(0,38,58);
   --c-mid:   rgb(0,100,180);
+  --sticky-filter-h: 0px;
 }}
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{font-family:system-ui,sans-serif;background:#f5f5f5;color:#222;padding:24px}}
@@ -131,12 +190,17 @@ body{{font-family:system-ui,sans-serif;background:#f5f5f5;color:#222;padding:24p
 h1{{font-size:1.4rem}}
 .toolbar{{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}}
 .toolbar label{{font-weight:600;font-size:.9rem}}
+.filter-row{{position:sticky;top:0;z-index:100;background:#f5f5f5;padding:10px 0;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,.09)}}
+.year-row{{position:sticky;top:var(--sticky-filter-h);z-index:99;background:#f5f5f5;padding:8px 0;margin-bottom:20px;box-shadow:0 2px 4px rgba(0,0,0,.07);justify-content:center}}
+.prog-wrap{{position:relative;overflow:visible}}
+#prog-popover{{display:none;position:absolute;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.15);padding:8px;z-index:200}}
   .arrow-sep{{font-size:.9rem;font-weight:700;color:var(--c-mid);flex-shrink:0;opacity:.7;letter-spacing:.04em}}.clear-badge>span{{transform:translateY(-1px)}}
 select{{padding:5px 8px;font-size:.95rem;border-radius:6px;border:1px solid #ccc;background:#fff}}
 .pill{{padding:5px 14px;border-radius:20px;border:1px solid #ccc;cursor:pointer;font-size:.83rem;background:#fff;user-select:none}}
 .pill.on{{background:var(--c-dark);color:#fff;border-color:var(--c-dark)}}
-.lang-pill{{padding:4px 10px;border-radius:20px;border:1px solid #ccc;cursor:pointer;font-size:.78rem;background:#fff;user-select:none}}
+.lang-pill{{padding:4px 10px;border-radius:20px;border:1px solid #ccc;cursor:pointer;font-size:.78rem;background:#fff;user-select:none;display:inline-flex;align-items:center;gap:4px}}
 .lang-pill.on{{background:var(--c-dark);color:#fff;border-color:var(--c-dark)}}
+.lang-pill svg{{vertical-align:middle;flex-shrink:0}}
 .card{{background:#fff;border-radius:10px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:20px}}
 .card h2{{font-size:.9rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px}}
 .chart-wrap{{position:relative;height:200px}}
@@ -168,7 +232,7 @@ tr.pie-hover td{{background:color-mix(in srgb,var(--c-dark) 8%,transparent)}}
 .cats{{display:grid;gap:16px}}
 .zone-unavail{{color:#aaa;font-style:italic;font-size:.85rem;padding:8px}}
 .prog-controls{{display:flex;gap:8px;align-items:center;margin-bottom:10px;font-size:.85rem}}
-.lang-bar{{display:flex;gap:4px;align-items:center}}
+.lang-bar{{display:flex;gap:4px;align-items:center;flex-wrap:wrap}}
 .pie-wrap{{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:4px}}
 .pie-item{{flex:1;min-width:200px;max-width:380px;text-align:center}}
 .pie-canvas-wrap{{position:relative;height:260px}}
@@ -179,26 +243,39 @@ footer a{{color:var(--c-mid);text-decoration:none}}footer a:hover{{text-decorati
 </style>
 </head>
 <body>
+<!--
+  Flag icons: OpenMoji (https://openmoji.org/) — CC BY-SA 4.0
+  National flags: Unicode CLDR flag sequences.
+  Regional flags (Catalonia, Galicia, Basque Country): OpenMoji extras-unicode subdivision flags.
+  Attribution: OpenMoji project by HfG Gmünd (https://github.com/hfg-gmuend/openmoji)
+-->
 <div class="title-bar">
   <h1 id="page-title">Banca Etica — Assemblee (partecipazione)</h1>
   <div class="lang-bar">
-    <span class="lang-pill on" data-lang="it"      onclick="setLang('it')">🇮🇹 IT</span>
-    <span class="lang-pill"    data-lang="en"      onclick="setLang('en')">🇬🇧 EN</span>
-    <span class="lang-pill"    data-lang="es-cast" onclick="setLang('es-cast')">🇪🇸 ES</span>
-    <span class="lang-pill"    data-lang="es-cat"  onclick="setLang('es-cat')">🇪🇸 CA</span>
-    <span class="lang-pill"    data-lang="es-gal"  onclick="setLang('es-gal')">🇪🇸 GL</span>
-    <span class="lang-pill"    data-lang="eu"      onclick="setLang('eu')">🇪🇸 EU</span>
-    <span class="lang-pill"    data-lang="de"      onclick="setLang('de')">🇩🇪 DE</span>
+{lang_pills_html}
   </div>
 </div>
-<div class="toolbar">
-  <label id="label-anno-a">Anno A <select id="selA"></select></label>
-  <span class="arrow-sep">→</span>
-  <label id="label-anno-b">Anno B <select id="selB"></select></label>
+<div id="filter-row" class="toolbar filter-row">
   <span id="pill-genre"     class="pill on" onclick="togglePill('genre')">Donne/Uomini</span>
   <span id="pill-tipologia" class="pill on" onclick="togglePill('tipologia')">Pers. fisiche/giuridiche</span>
   <span id="pill-mode"      class="pill on" onclick="togglePill('mode')">Presenza/Distanza</span>
-  <span id="pill-chart-mode" class="pill" style="margin-left:auto" onclick="toggleChartMode()">⭕ Torte</span>
+</div>
+<div class="card" id="prog-card">
+  <h2 id="prog-title">Progressione annuale</h2>
+  <div class="prog-controls">
+    <span class="pill on" data-prog="votanti" onclick="toggleProgMetric('votanti')">Partecipazione</span>
+    <span class="pill"    data-prog="soci"    onclick="toggleProgMetric('soci')">Pers. socie</span>
+    <span class="pill"    data-prog="mode"    onclick="toggleProgMetric('mode')">Presenza/Distanza</span>
+  </div>
+  <div class="prog-wrap">
+    <div class="chart-wrap" style="height:320px"><canvas id="prog-chart"></canvas></div>
+    <div id="prog-popover"></div>
+  </div>
+</div>
+<div id="year-row" class="toolbar year-row">
+  <label id="label-anno-a">Anno A <select id="selA"></select></label>
+  <span class="arrow-sep">→</span>
+  <label id="label-anno-b">Anno B <select id="selB"></select></label>
 </div>
 
 <div class="card" id="zone-card">
@@ -211,17 +288,10 @@ footer a{{color:var(--c-mid);text-decoration:none}}footer a:hover{{text-decorati
   <div id="zones-content"></div>
 </div>
 
-<div id="charts-section"></div>
-
-<div class="card">
-  <h2 id="prog-title">Progressione annuale</h2>
-  <div class="prog-controls">
-    <span class="pill on" data-prog="votanti" onclick="toggleProgMetric('votanti')">Partecipazione</span>
-    <span class="pill"    data-prog="soci"    onclick="toggleProgMetric('soci')">Pers. socie</span>
-    <span class="pill"    data-prog="mode"    onclick="toggleProgMetric('mode')">Presenza/Distanza</span>
-  </div>
-  <div class="chart-wrap" style="height:240px"><canvas id="prog-chart"></canvas></div>
+<div style="margin-bottom:12px;display:flex;justify-content:flex-end">
+  <span id="pill-chart-mode" class="pill" onclick="toggleChartMode()">⭕ Torte</span>
 </div>
+<div id="charts-section"></div>
 
 <footer>
   <div style="display:flex;flex-direction:column;gap:3px">
@@ -279,6 +349,7 @@ function setPieHover(baseId, idx) {{
 let charts = {{}};
 let progMetrics = new Set(['votanti']);
 let LANG = 'it';
+(function(){{const fr=document.getElementById('filter-row');if(fr&&window.ResizeObserver){{const upd=()=>document.documentElement.style.setProperty('--sticky-filter-h',fr.offsetHeight+'px');new ResizeObserver(upd).observe(fr);upd();}}}})();
 
 const PIE_PALETTE = ['#003087','#00a8cc','#00c87a','#ffb300','#cc2244','#7c3aed','#0e7490','#059669','#d97706','#dc2626','#7c3aed','#0284c7'];
 function pieColors(n) {{ return Array.from({{length:n}},(_,i)=>PIE_PALETTE[i%PIE_PALETTE.length]); }}
@@ -308,6 +379,7 @@ function toggleChartMode() {{
   const p=document.getElementById('pill-chart-mode');
   p.classList.toggle('on', chartMode==='pie');
   p.textContent = chartMode==='bar' ? `⭕ ${{t('mostra_torte')}}` : `📊 ${{t('mostra_barre')}}`;
+  pushState();
   render();
 }}
 
@@ -328,6 +400,7 @@ function setLang(lang) {{
   rebuildLabels();
   updateSelOptions();
   applyLang();
+  pushState();
   render();
 }}
 
@@ -354,6 +427,7 @@ function applyLang() {{
   }});
   document.querySelectorAll('.lang-pill').forEach(p => {{
     p.classList.toggle('on', p.dataset.lang === LANG);
+    p.title = t('lang_' + p.dataset.lang.replace(/-/g, '_'));
   }});
   const cmp=document.getElementById('pill-chart-mode');
   if (cmp) {{ cmp.textContent = chartMode==='bar' ? `⭕ ${{t('mostra_torte')}}` : `📊 ${{t('mostra_barre')}}`; cmp.classList.toggle('on', chartMode==='pie'); }}
@@ -381,8 +455,8 @@ populateSel(selB, KEYS);
 selA.value = KEYS[KEYS.length - 2] || KEYS[0];
 selB.value = KEYS[KEYS.length - 1];
 updateSelOptions();
-selA.addEventListener('change', () => {{ updateSelOptions(); render(); }});
-selB.addEventListener('change', () => {{ updateSelOptions(); render(); }});
+selA.addEventListener('change', () => {{ updateSelOptions(); pushState(); render(); }});
+selB.addEventListener('change', () => {{ updateSelOptions(); pushState(); render(); }});
 
 // ── utilities ──────────────────────────────────────────────────────────────
 function fmt(v) {{ return v == null ? '–' : v.toLocaleString('it-IT'); }}
@@ -411,6 +485,90 @@ function hasAnyField(zones, field) {{
   return zones && Object.values(zones).some(z => z && z[field] != null);
 }}
 
+// ── URL state encoding ──────────────────────────────────────────────────────
+function encodeSelState() {{
+  if (sel.type === 'none') return 'none';
+  return encodeURIComponent(sel.key || 'none');
+}}
+function encodeState() {{
+  return [
+    `lang=${{LANG}}`,
+    `annoA=${{selA.value}}`,
+    `annoB=${{selB.value}}`,
+    `sel=${{encodeSelState()}}`,
+    `mode=${{chartMode}}`,
+    `genre=${{fieldToggles.genre?1:0}}`,
+    `tipologia=${{fieldToggles.tipologia?1:0}}`,
+    `modeToggle=${{fieldToggles.mode?1:0}}`,
+    `metric=${{Array.from(progMetrics).join(',')}}`,
+  ].join('&');
+}}
+function pushState() {{
+  history.replaceState(null, '', '#' + encodeState());
+}}
+function parseHash() {{
+  const raw = window.location.hash.slice(1);
+  if (!raw) return null;
+  const params = {{}};
+  raw.split('&').forEach(pair => {{
+    const eq = pair.indexOf('=');
+    if (eq < 0) return;
+    params[pair.slice(0,eq)] = decodeURIComponent(pair.slice(eq+1));
+  }});
+  return params;
+}}
+function restoreSelFromKey(selKey) {{
+  if (!selKey || selKey === 'none') {{ sel = {{type:'none'}}; return; }}
+  const colon = selKey.indexOf(':');
+  if (colon < 0) {{ sel = {{type:'none'}}; return; }}
+  const type = selKey.slice(0,colon), key = selKey.slice(colon+1);
+  const kA=selA.value, kB=selB.value;
+  const itA=((RAW[kA]||{{}}).zones||{{}}).italia||{{}}, itB=((RAW[kB]||{{}}).zones||{{}}).italia||{{}};
+  const esA=((RAW[kA]||{{}}).zones||{{}}).spagna||{{}}, esB=((RAW[kB]||{{}}).zones||{{}}).spagna||{{}};
+  const allIt=[...new Set([...Object.keys(itA),...Object.keys(itB)])];
+  const allEs=[...new Set([...Object.keys(esA),...Object.keys(esB)])].sort();
+  if (type==='it-total') {{
+    const children=AREA_ORDER.filter(a=>allIt.some(n=>PROVINCE_AREA[n]===a));
+    sel={{type:'group',key:selKey,labelKey:'sel_italia',children,childType:'area'}};
+  }} else if (type==='area') {{
+    const children=allIt.filter(n=>PROVINCE_AREA[n]===key).sort();
+    sel={{type:'group',key:selKey,label:key,children,childType:'province'}};
+  }} else if (type==='es-total') {{
+    sel={{type:'group',key:selKey,labelKey:'sel_spagna',children:allEs,childType:'fiare'}};
+  }} else if (type==='province'||type==='fiare') {{
+    sel={{type:'leaf',key:selKey,name:key,label:key}};
+  }} else {{
+    sel={{type:'none'}};
+  }}
+}}
+function applyState(params) {{
+  if (!params) return;
+  if (params.lang && TRANSLATIONS[params.lang]) {{
+    LANG = params.lang;
+    document.documentElement.lang = LANG.startsWith('es') ? LANG.replace('es-','') : LANG;
+  }}
+  rebuildLabels();
+  if (params.annoA && KEYS.includes(params.annoA)) selA.value = params.annoA;
+  if (params.annoB && KEYS.includes(params.annoB)) selB.value = params.annoB;
+  updateSelOptions();
+  if (params.annoA && KEYS.includes(params.annoA)) selA.value = params.annoA;
+  if (params.annoB && KEYS.includes(params.annoB)) selB.value = params.annoB;
+  if (params.mode==='bar'||params.mode==='pie') {{
+    chartMode=params.mode;
+    const p=document.getElementById('pill-chart-mode');
+    if (p) p.classList.toggle('on',chartMode==='pie');
+  }}
+  if (params.genre!==undefined) {{ fieldToggles.genre=params.genre==='1'; const p=document.getElementById('pill-genre'); if (p) p.classList.toggle('on',fieldToggles.genre); }}
+  if (params.tipologia!==undefined) {{ fieldToggles.tipologia=params.tipologia==='1'; const p=document.getElementById('pill-tipologia'); if (p) p.classList.toggle('on',fieldToggles.tipologia); }}
+  if (params.modeToggle!==undefined) {{ fieldToggles.mode=params.modeToggle==='1'; const p=document.getElementById('pill-mode'); if (p) p.classList.toggle('on',fieldToggles.mode); }}
+  if (params.metric) {{
+    const keys=params.metric.split(',').filter(k=>['votanti','soci','mode'].includes(k));
+    if (keys.length>0) {{ progMetrics=new Set(keys); document.querySelectorAll('[data-prog]').forEach(p=>{{ p.classList.toggle('on',progMetrics.has(p.dataset.prog)); }}); }}
+  }}
+  if (params.sel&&params.sel!=='none') restoreSelFromKey(params.sel);
+  else sel={{type:'none'}};
+}}
+
 // ── selection helpers ───────────────────────────────────────────────────────
 function selDisplayLabel() {{ return sel.labelKey ? t(sel.labelKey) : (sel.label || ''); }}
 
@@ -435,9 +593,9 @@ function selZoneData(stem) {{
 
 // ── selection handling ──────────────────────────────────────────────────────
 function handleRowClick(type, key) {{
-  if (type === 'clear') {{ sel = {{type:'none'}}; render(); return; }}
+  if (type === 'clear') {{ sel = {{type:'none'}}; pushState(); render(); return; }}
   const selKey = type + ':' + key;
-  if (sel.key === selKey) {{ sel = {{type:'none'}}; render(); return; }}
+  if (sel.key === selKey) {{ sel = {{type:'none'}}; pushState(); render(); return; }}
 
   const kA = selA.value, kB = selB.value;
   const itA = ((RAW[kA]||{{}}).zones||{{}}).italia||{{}};
@@ -458,15 +616,17 @@ function handleRowClick(type, key) {{
   }} else {{
     sel = {{type:'leaf', key:selKey, name:key, label:key}};
   }}
+  pushState();
   render();
 }}
 
-function clearSel() {{ sel = {{type:'none'}}; render(); }}
+function clearSel() {{ sel = {{type:'none'}}; pushState(); render(); }}
 
 // ── field toggles ───────────────────────────────────────────────────────────
 function togglePill(key) {{
   fieldToggles[key] = !fieldToggles[key];
   document.getElementById('pill-'+key).classList.toggle('on', fieldToggles[key]);
+  pushState();
   render();
 }}
 
@@ -480,6 +640,7 @@ function toggleProgMetric(key) {{
   document.querySelectorAll('[data-prog]').forEach(p => {{
     p.classList.toggle('on', progMetrics.has(p.dataset.prog));
   }});
+  pushState();
   renderProgression();
 }}
 
@@ -908,6 +1069,12 @@ function renderLeaf(section) {{
 }}
 
 // ── progression chart ────────────────────────────────────────────────────────
+const progVerticalLinesPlugin={{id:'progVerticalLines',afterDraw(chart){{const iA=KEYS.indexOf(selA.value),iB=KEYS.indexOf(selB.value);if(iA<0&&iB<0)return;const c=chart.ctx,xS=chart.scales.x,yS=chart.scales.y,top=yS.top,bot=yS.bottom;c.save();c.setLineDash([6,4]);c.lineWidth=2;if(iA>=0){{const px=xS.getPixelForValue(iA);c.strokeStyle=C_DARK;c.beginPath();c.moveTo(px,top);c.lineTo(px,bot);c.stroke();}}if(iB>=0){{const px=xS.getPixelForValue(iB);c.strokeStyle=C_LIGHT;c.beginPath();c.moveTo(px,top);c.lineTo(px,bot);c.stroke();}}c.restore();}}}};
+function hideProgPopover(){{const p=document.getElementById('prog-popover');if(p)p.style.display='none';}}
+function showProgPopover(nativeEvt,idx){{const p=document.getElementById('prog-popover');if(!p)return;const wrap=document.querySelector('.prog-wrap');if(!wrap)return;const wr=wrap.getBoundingClientRect();const x=nativeEvt.clientX-wr.left+8,y=nativeEvt.clientY-wr.top+8;p.innerHTML=`<button class="pill" onclick="popoverSetA(${{idx}})">${{t('imposta_anno_a')}}</button><button class="pill" onclick="popoverSetB(${{idx}})">${{t('imposta_anno_b')}}</button>`;p.style.cssText=`display:flex;left:${{x}}px;top:${{y}}px;position:absolute;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.15);padding:8px;z-index:200;gap:6px;flex-direction:column`;}}
+function popoverSetA(idx){{hideProgPopover();selA.value=KEYS[idx];updateSelOptions();render();}}
+function popoverSetB(idx){{hideProgPopover();selB.value=KEYS[idx];updateSelOptions();render();}}
+document.addEventListener('click',e=>{{const p=document.getElementById('prog-popover');if(p&&p.style.display!=='none'&&!p.contains(e.target))hideProgPopover();}});
 let progChart = null;
 function progVal(stem, metric) {{
   const z=selZoneData(stem);
@@ -982,9 +1149,22 @@ function renderProgression() {{
   }}
   progChart=new Chart(ctx,{{
     type:'line',
+    plugins:[progVerticalLinesPlugin],
     data:{{labels:yearLabels,datasets}},
     options:{{responsive:true,maintainAspectRatio:false,
       interaction:{{mode:'index',intersect:false}},
+      onClick:(event,activeElements)=>{{
+        if(!progChart)return;
+        hideProgPopover();
+        const xScale=progChart.scales.x;
+        const idx=Math.round(xScale.getValueForPixel(event.x));
+        if(idx<0||idx>=KEYS.length)return;
+        const iA=KEYS.indexOf(selA.value),iB=KEYS.indexOf(selB.value);
+        if(idx===iA||idx===iB)return;
+        if(idx<iA){{selA.value=KEYS[idx];updateSelOptions();render();return;}}
+        if(idx>iB){{selB.value=KEYS[idx];updateSelOptions();render();return;}}
+        showProgPopover(event.native,idx);
+      }},
       plugins:{{legend:{{display:true,position:'top',labels:{{filter:item=>!item.text.startsWith('_')}}}},tooltip:{{mode:'index',intersect:false,filter:item=>!item.dataset.label.startsWith('_'),callbacks:{{label:ctx=>`${{ctx.dataset.label}}: ${{fmt(ctx.raw)}}`}}}}}},
       scales:{{y:{{beginAtZero:false}}}},
     }},
@@ -1001,9 +1181,18 @@ function render() {{
   renderProgression();
 }}
 
-rebuildLabels();
-applyLang();
-render();
+(function boot() {{
+  rebuildLabels();
+  const params = parseHash();
+  if (params) applyState(params);
+  applyLang();
+  render();
+  if (!window.location.hash) pushState();
+}})();
+window.addEventListener('hashchange', () => {{
+  const params = parseHash();
+  if (params) {{ applyState(params); applyLang(); render(); }}
+}});
 </script>
 </body>
 </html>"""

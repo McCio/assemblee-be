@@ -63,6 +63,8 @@
     "footer_dati": "Dati",
     "footer_codice": "Codice",
     "footer_fatto_con": "Fatto con ♥️ da Marco Ciotola 🧠 con Claude 🤖",
+    "imposta_anno_a": "Imposta come Anno A",
+    "imposta_anno_b": "Imposta come Anno B",
     "months": [
       "Gen",
       "Feb",
@@ -142,6 +144,8 @@
     "footer_dati": "Data",
     "footer_codice": "Code",
     "footer_fatto_con": "Made with ♥️ by Marco Ciotola 🧠 with Claude 🤖",
+    "imposta_anno_a": "Set as Year A",
+    "imposta_anno_b": "Set as Year B",
     "months": [
       "Jan",
       "Feb",
@@ -221,6 +225,8 @@
     "footer_dati": "Datos",
     "footer_codice": "Código",
     "footer_fatto_con": "Hecho con ♥️ por Marco Ciotola 🧠 con Claude 🤖",
+    "imposta_anno_a": "Establecer como Año A",
+    "imposta_anno_b": "Establecer como Año B",
     "months": [
       "Ene",
       "Feb",
@@ -300,6 +306,8 @@
     "footer_dati": "Dades",
     "footer_codice": "Codi",
     "footer_fatto_con": "Fet amb ♥️ per Marco Ciotola 🧠 amb Claude 🤖",
+    "imposta_anno_a": "Establir com Any A",
+    "imposta_anno_b": "Establir com Any B",
     "months": [
       "Gen",
       "Feb",
@@ -379,6 +387,8 @@
     "footer_dati": "Datos",
     "footer_codice": "Código",
     "footer_fatto_con": "Feito con ♥️ por Marco Ciotola 🧠 con Claude 🤖",
+    "imposta_anno_a": "Establecer como Ano A",
+    "imposta_anno_b": "Establecer como Ano B",
     "months": [
       "Xan",
       "Feb",
@@ -458,6 +468,8 @@
     "footer_dati": "Datuak",
     "footer_codice": "Kodea",
     "footer_fatto_con": "♥️ egina Marco Ciotolak 🧠 Clauderekin 🤖",
+    "imposta_anno_a": "A urte gisa ezarri",
+    "imposta_anno_b": "B urte gisa ezarri",
     "months": [
       "Urt",
       "Ots",
@@ -537,6 +549,8 @@
     "footer_dati": "Daten",
     "footer_codice": "Code",
     "footer_fatto_con": "Gemacht mit ♥️ von Marco Ciotola 🧠 mit Claude 🤖",
+    "imposta_anno_a": "Als Jahr A festlegen",
+    "imposta_anno_b": "Als Jahr B festlegen",
     "months": [
       "Jan",
       "Feb",
