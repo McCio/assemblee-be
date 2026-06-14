@@ -5,6 +5,7 @@
 import html
 import json
 import re
+import sys
 from pathlib import Path
 
 DATA = Path("data")
@@ -196,6 +197,11 @@ def normalize_zones(raw_zones):
         name = html.unescape(raw_name)
         name = ZONE_ALIASES.get(name, name)
         entry = unify_zone(data)
+        if name == "":
+            numeric_fields = ("votanti", "soci", "donne", "uomini", "fisiche", "giuridiche", "presenza", "distanza")
+            if any(entry.get(f, 0) for f in numeric_fields):
+                print(f"WARNING: zone entry with empty key has non-zero values: {entry}", file=sys.stderr)
+            continue
         if name.lower().startswith("fiare"):
             spagna[name] = entry
         else:
