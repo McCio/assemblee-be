@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assemblee Banca Etica</title>
+<style>
+:root {
+  --c-dark:  rgb(0,48,135);
+  --c-light: rgb(0,200,255);
+  --c-black: rgb(0,38,58);
+  --c-mid:   rgb(0,100,180);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f5;color:#222;padding:24px;max-width:900px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+main{flex:1}
+.title-bar{display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.logo-mark{width:48px;height:48px;border-radius:10px;background:var(--c-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{display:block}
+h1{font-size:1.6rem;color:var(--c-black);line-height:1.2;flex:1;min-width:200px}
+h1 span{display:block;font-size:.9rem;font-weight:400;color:#666;margin-top:4px}
+.lang-bar{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lang-pill{padding:4px 10px;border-radius:20px;border:1px solid #ccc;cursor:pointer;font-size:.78rem;background:#fff;user-select:none;display:inline-flex;align-items:center;gap:4px}
+.lang-pill.on{background:var(--c-dark);color:#fff;border-color:var(--c-dark)}
+.lang-pill svg{vertical-align:middle;flex-shrink:0}
+.card{background:#fff;border-radius:10px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:20px}
+.card h2{font-size:.85rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.card p{font-size:.95rem;line-height:1.6;color:#333;margin-bottom:0}
+.card p+p{margin-top:10px}
+.cta-wrap{text-align:center;margin:8px 0 4px}
+.btn-primary{display:inline-block;background:var(--c-dark);color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:1.05rem;font-weight:600;letter-spacing:.02em;transition:background .15s}
+.btn-primary:hover{background:var(--c-mid)}
+.data-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.data-links a{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;border:1.5px solid var(--c-dark);color:var(--c-dark);text-decoration:none;font-size:.85rem;font-weight:600;transition:background .15s,color .15s}
+.data-links a:hover{background:var(--c-dark);color:#fff}
+.data-heading{font-size:.8rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.05em;margin:16px 0 4px}
+footer{margin-top:8px;padding:16px 0;border-top:1px solid #e0e0e0;font-size:.8rem;color:#888;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+footer a{color:var(--c-mid);text-decoration:none}
+footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<main>
+  <div class="title-bar">
+    <div class="logo-mark" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2"  y="14" width="6" height="12" rx="1.5" fill="rgb(0,200,255)"/>
+        <rect x="11" y="8"  width="6" height="18" rx="1.5" fill="rgb(0,200,255)" opacity=".85"/>
+        <rect x="20" y="3"  width="6" height="23" rx="1.5" fill="rgb(0,200,255)" opacity=".7"/>
+      </svg>
+    </div>
+    <h1 id="title">Assemblee Banca Etica
+      <span id="subtitle">Visualizzazione della partecipazione alle assemblee annuali dei soci</span>
+    </h1>
+    <div class="lang-bar" id="lang-bar">
+      <span class="lang-pill on" data-lang="it" onclick="setLang('it')"><svg width="20" height="20" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"><g><rect x="5" y="17" width="62" height="38" fill="#fff"/><rect x="5" y="17" width="21" height="38" fill="#5c9e31"/><rect x="46" y="17" width="21" height="38" fill="#d22f27"/></g><g><rect x="5" y="17" width="62" height="38" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></g></svg> IT</span>
+      <span class="lang-pill" data-lang="en" onclick="setLang('en')"><svg width="20" height="20" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"><g><rect x="5" y="17" width="62" height="38" fill="#1e50a0"/><g><polygon fill="#fff" points="40 28.856 40 32 50.181 32 67 21.691 67 17 59.346 17 40 28.856"/><polygon fill="#d22f27" points="67 17 67 17 63.173 17 40 31.203 40 32 43.482 32 67 17.586 67 17"/><polygon fill="#fff" points="59.347 55 67 55 67 55 67 50.308 50.182 40 40 40 40 43.143 59.347 55"/><polygon fill="#d22f27" points="67 55 67 52.653 46.355 40 41.568 40 66.042 55 67 55 67 55"/><polygon fill="#fff" points="32 43.144 32 40 21.819 40 5 50.309 5 55 12.654 55 32 43.144"/><polygon fill="#d22f27" points="5 55 5 55 8.827 55 32 40.797 32 40 28.518 40 5 54.414 5 55"/><polygon fill="#fff" points="12.653 17 5 17 5 17 5 21.692 21.818 32 32 32 32 28.857 12.653 17"/><polygon fill="#d22f27" points="5 17 5 19.347 25.646 32 30.432 32 5.958 17 5 17 5 17"/><rect x="5" y="31" width="62" height="10" fill="#fff"/><rect x="31" y="17" width="10" height="38" fill="#fff"/><rect x="5" y="33" width="62" height="6" fill="#d22f27"/><rect x="33" y="17" width="6" height="38" fill="#d22f27"/></g></g><g><rect x="5" y="17" width="62" height="38" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></g></svg> EN</span>
+      <span class="lang-pill" data-lang="es-cast" onclick="setLang('es-cast')"><svg width="20" height="20" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"><g><rect x="5" y="17" width="62" height="38" fill="#f1b31c"/><path fill="#d22f27" d="M23,33v7a2.0059,2.0059,0,0,1-2,2H17a2.0059,2.0059,0,0,1-2-2V33"/><rect x="5" y="17" width="62" height="9" fill="#d22f27"/><rect x="5" y="46" width="62" height="9" fill="#d22f27"/><rect x="19" y="33" width="4" height="4" fill="#f1b31c"/><circle cx="19" cy="37" r="1.5" fill="#6a462f"/></g><g><rect x="5" y="17" width="62" height="38" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></g></svg> ES</span>
+      <span class="lang-pill" data-lang="es-cat" onclick="setLang('es-cat')"><svg width="20" height="20" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"><g><rect x="5" y="17" width="62" height="38" fill="#f1b31c"/><rect x="5" y="22" width="62" height="4" fill="#d22f27"/><rect x="5" y="30" width="62" height="4" fill="#d22f27"/><rect x="5" y="38" width="62" height="4" fill="#d22f27"/><rect x="5" y="46" width="62" height="4" fill="#d22f27"/></g><g><rect x="5" y="17" width="62" height="38" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></g></svg> CA</span>
+      <span class="lang-pill" data-lang="es-gal" onclick="setLang('es-gal')"><svg width="20" height="20" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"><g><rect x="5" y="17" width="62" height="38" fill="#fff"/><path fill="#61b2e4" d="m10.3 17.03c-5.301-0.03272-5.301-0.03272-5.432 3.904l56.9 34.13c5.235-0.06544 5.235-0.06544 5.202-4.018z"/></g><g><rect x="5" y="17" width="62" height="38" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></g></svg> GL</span>
+      <span class="lang-pill" data-lang="eu" onclick="setLang('eu')"><svg width="20" height="20" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"><g><rect x="5" y="17" width="62" height="38" fill="#d22f27"/><path fill="#5c9e31" d="m10.6 54.72c-5.599 0.3008-5.599 0.3008-5.645-3.774l56.15-33.69c4.468 0.132 6.208-0.8087 5.843 3.674z"/><path fill="#5c9e31" d="m10.3 17.03c-5.301-0.03272-5.301-0.03272-5.432 3.904l56.9 34.13c5.235-0.06544 5.235-0.06544 5.202-4.018z"/><polygon fill="#fff" points="67 33 39 33 39 17 33 17 33 33 5 33 5 39 33 39 33 55 39 55 39 39 67 39 67 33"/></g><g><rect x="5" y="17" width="62" height="38" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></g></svg> EU</span>
+      <span class="lang-pill" data-lang="de" onclick="setLang('de')"><svg width="20" height="20" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"><g><rect x="5" y="17" width="62" height="38" fill="#f1b31c"/><rect x="5" y="30" width="62" height="12" fill="#d22f27"/><rect x="5" y="17" width="62" height="13"/></g><g><rect x="5" y="17" width="62" height="38" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></g></svg> DE</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="card-title"></h2>
+    <p id="card-text"></p>
+    <div class="cta-wrap" style="margin-top:20px">
+      <a class="btn-primary" id="cta" href="dashboard.html"></a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="data-title"></h2>
+    <p id="data-text"></p>
+
+    <h3 class="data-heading" id="h-raw"></h3>
+    <div class="data-links">
+      <a href="data/2016.05.json">2016.05</a>
+      <a href="data/2017.05.json">2017.05</a>
+      <a href="data/2018.05.json">2018.05</a>
+      <a href="data/2019.05.json">2019.05</a>
+      <a href="data/2020.05.json">2020.05</a>
+      <a href="data/2021.05.json">2021.05</a>
+      <a href="data/2021.09.json">2021.09</a>
+      <a href="data/2022.05.json">2022.05</a>
+      <a href="data/2023.05.json">2023.05</a>
+      <a href="data/2024.05.json">2024.05</a>
+      <a href="data/2024.09.json">2024.09</a>
+      <a href="data/2025.05.json">2025.05</a>
+      <a href="data/2026.05.json">2026.05</a>
+    </div>
+
+    <h3 class="data-heading" id="h-norm"></h3>
+    <div class="data-links">
+      <a href="normalized/2016.05.json">2016.05</a>
+      <a href="normalized/2017.05.json">2017.05</a>
+      <a href="normalized/2018.05.json">2018.05</a>
+      <a href="normalized/2019.05.json">2019.05</a>
+      <a href="normalized/2020.05.json">2020.05</a>
+      <a href="normalized/2021.05.json">2021.05</a>
+      <a href="normalized/2021.09.json">2021.09</a>
+      <a href="normalized/2022.05.json">2022.05</a>
+      <a href="normalized/2023.05.json">2023.05</a>
+      <a href="normalized/2024.05.json">2024.05</a>
+      <a href="normalized/2024.09.json">2024.09</a>
+      <a href="normalized/2025.05.json">2025.05</a>
+      <a href="normalized/2026.05.json">2026.05</a>
+    </div>
+
+    <h3 class="data-heading" id="h-csv"></h3>
+    <div class="data-links">
+      <a href="csv/zones_total.csv" id="csv-total"></a>
+      <a href="csv/zones_by_country.csv" id="csv-country"></a>
+      <a href="csv/zones_by_area.csv" id="csv-area"></a>
+      <a href="csv/zones_by_province.csv" id="csv-province"></a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div style="display:flex;flex-direction:column;gap:3px">
+    <span><span id="f-source"></span>: <a href="https://www.bancaetica.it/archivio-assemblee/" target="_blank" rel="noopener">Archivio Assemblee — Banca Etica</a></span>
+    <span><span id="f-data"></span>: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></span>
+    <span><span id="f-code"></span>: <a href="https://github.com/McCio/assemblee-be" target="_blank" rel="noopener">GitHub</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0</a></span>
+  </div>
+</footer>
+<script>
+var T = {
+  it: {
+    title: "Assemblee Banca Etica",
+    subtitle: "Visualizzazione della partecipazione alle assemblee annuali dei soci",
+    card_title: "Cruscotto interattivo",
+    card_text: "Il cruscotto mostra la partecipazione alle assemblee annuali dei soci di Banca Etica per anno, zona geografica, modalità di voto, tipologia e genere dei soci. I dati sono filtrabili e navigabili direttamente nel browser.",
+    cta: "Apri il cruscotto →",
+    data_title: "Dati",
+    data_text: "I dati grezzi (un file JSON per assemblea, estratti dall'archivio assemblee di Banca Etica) e i dati normalizzati sono disponibili in questo sito.",
+    raw: "Dati grezzi", norm: "Dati normalizzati", csv: "CSV aggregati",
+    csv_total: "Totale", csv_country: "Per paese", csv_area: "Per area", csv_province: "Per provincia",
+    footer_source: "Fonte", footer_data: "Dati", footer_code: "Codice"
+  },
+  en: {
+    title: "Banca Etica Assemblies",
+    subtitle: "Visualisation of member participation in annual assemblies",
+    card_title: "Interactive dashboard",
+    card_text: "The dashboard shows participation in Banca Etica’s annual member assemblies by year, geographic zone, voting mode, member type and gender. Data can be filtered and explored directly in the browser.",
+    cta: "Open the dashboard →",
+    data_title: "Data",
+    data_text: "Raw data (one JSON file per assembly, extracted from Banca Etica’s assembly archive) and normalised data are available on this site.",
+    raw: "Raw data", norm: "Normalised data", csv: "Aggregated CSV",
+    csv_total: "Total", csv_country: "By country", csv_area: "By area", csv_province: "By province",
+    footer_source: "Source", footer_data: "Data", footer_code: "Code"
+  },
+  "es-cast": {
+    title: "Asambleas Banca Ética",
+    subtitle: "Visualización de la participación en las asambleas anuales de socios",
+    card_title: "Panel interactivo",
+    card_text: "El panel muestra la participación en las asambleas anuales de socios de Banca Ética por año, zona geográfica, modalidad de voto, tipo y género de los socios. Los datos se pueden filtrar y explorar directamente en el navegador.",
+    cta: "Abrir el panel →",
+    data_title: "Datos",
+    data_text: "Los datos brutos (un archivo JSON por asamblea, extraídos del archivo de asambleas de Banca Ética) y los datos normalizados están disponibles en este sitio.",
+    raw: "Datos brutos", norm: "Datos normalizados", csv: "CSV agregados",
+    csv_total: "Total", csv_country: "Por país", csv_area: "Por área", csv_province: "Por provincia",
+    footer_source: "Fuente", footer_data: "Datos", footer_code: "Código"
+  },
+  "es-cat": {
+    title: "Assemblees Banca Ètica",
+    subtitle: "Visualització de la participació a les assemblees anuals de socis",
+    card_title: "Panell interactiu",
+    card_text: "El panell mostra la participació a les assemblees anuals de socis de Banca Ètica per any, zona geogràfica, modalitat de vot, tipus i gènere dels socis. Les dades es poden filtrar i explorar directament al navegador.",
+    cta: "Obrir el panell →",
+    data_title: "Dades",
+    data_text: "Les dades en brut (un fitxer JSON per assemblea, extrets de l'arxiu d'assemblees de Banca Ètica) i les dades normalitzades estan disponibles en aquest lloc.",
+    raw: "Dades en brut", norm: "Dades normalitzades", csv: "CSV agregats",
+    csv_total: "Total", csv_country: "Per país", csv_area: "Per àrea", csv_province: "Per província",
+    footer_source: "Font", footer_data: "Dades", footer_code: "Codi"
+  },
+  "es-gal": {
+    title: "Asembleas Banca Ética",
+    subtitle: "Visualización da participación nas asembleas anuais de socios",
+    card_title: "Panel interactivo",
+    card_text: "O panel mostra a participación nas asembleas anuais de socios de Banca Ética por ano, zona xeográfica, modalidade de voto, tipo e xénero dos socios. Os datos pódense filtrar e explorar directamente no navegador.",
+    cta: "Abrir o panel →",
+    data_title: "Datos",
+    data_text: "Os datos brutos (un ficheiro JSON por asemblea, extraídos do arquivo de asembleas de Banca Ética) e os datos normalizados están dispoñibles neste sitio.",
+    raw: "Datos brutos", norm: "Datos normalizados", csv: "CSV agregados",
+    csv_total: "Total", csv_country: "Por país", csv_area: "Por área", csv_province: "Por provincia",
+    footer_source: "Fonte", footer_data: "Datos", footer_code: "Código"
+  },
+  eu: {
+    title: "Banca Etica Batzarrak",
+    subtitle: "Bazkideen urteko batzarretako parte-hartzearen bistaratzea",
+    card_title: "Panel interaktiboa",
+    card_text: "Panelak Banca Eticaren bazkideen urteko batzarretako parte-hartzea erakusten du urtearen, eremu geografikoaren, boto-moduaren, bazkide-motaren eta generoaren arabera. Datuak zuzenean iragazi eta esploratu daitezke nabigatzailean.",
+    cta: "Panela ireki →",
+    data_title: "Datuak",
+    data_text: "Datu gordinak (batzar bakoitzeko JSON fitxategi bat, Banca Eticaren batzar-artxibotik aterata) eta datu normalizatuak gune honetan daude eskuragarri.",
+    raw: "Datu gordinak", norm: "Datu normalizatuak", csv: "CSV agregatuak",
+    csv_total: "Guztira", csv_country: "Herrialdeka", csv_area: "Eremuka", csv_province: "Probintziaka",
+    footer_source: "Iturria", footer_data: "Datuak", footer_code: "Kodea"
+  },
+  de: {
+    title: "Versammlungen Banca Etica",
+    subtitle: "Darstellung der Teilnahme an den jährlichen Mitgliederversammlungen",
+    card_title: "Interaktives Dashboard",
+    card_text: "Das Dashboard zeigt die Teilnahme an den jährlichen Mitgliederversammlungen der Banca Etica nach Jahr, geografischer Zone, Abstimmungsmodus, Mitgliedstyp und Geschlecht. Die Daten können direkt im Browser gefiltert und erkundet werden.",
+    cta: "Dashboard öffnen →",
+    data_title: "Daten",
+    data_text: "Die Rohdaten (eine JSON-Datei pro Versammlung, aus dem Versammlungsarchiv der Banca Etica extrahiert) und die normalisierten Daten sind auf dieser Seite verfügbar.",
+    raw: "Rohdaten", norm: "Normalisierte Daten", csv: "Aggregierte CSV",
+    csv_total: "Gesamt", csv_country: "Nach Land", csv_area: "Nach Gebiet", csv_province: "Nach Provinz",
+    footer_source: "Quelle", footer_data: "Daten", footer_code: "Code"
+  }
+};
+
+var LANGS = ['it','en','es-cast','es-cat','es-gal','eu','de'];
+var LANG = 'it';
+
+function detectLang() {
+  var nav = (navigator.language || '').toLowerCase();
+  for (var i = 0; i < LANGS.length; i++) {
+    if (nav.startsWith(LANGS[i])) return LANGS[i];
+  }
+  if (nav.startsWith('es')) return 'es-cast';
+  if (nav.startsWith('en')) return 'en';
+  if (nav.startsWith('de')) return 'de';
+  if (nav.startsWith('eu')) return 'eu';
+  return 'it';
+}
+
+function t(k) { return (T[LANG] || T.it)[k] || T.it[k] || k; }
+
+function applyLang() {
+  document.documentElement.lang = LANG.startsWith('es') ? LANG.replace('es-','') : LANG;
+  document.title = t('title');
+  document.getElementById('title').childNodes[0].textContent = t('title') + '\n';
+  document.getElementById('subtitle').textContent = t('subtitle');
+  document.getElementById('card-title').textContent = t('card_title');
+  document.getElementById('card-text').textContent = t('card_text');
+  document.getElementById('cta').textContent = t('cta');
+  document.getElementById('cta').href = 'dashboard.html#lang=' + LANG;
+  document.getElementById('data-title').textContent = t('data_title');
+  document.getElementById('data-text').textContent = t('data_text');
+  document.getElementById('h-raw').textContent = t('raw');
+  document.getElementById('h-norm').textContent = t('norm');
+  document.getElementById('h-csv').textContent = t('csv');
+  document.getElementById('csv-total').textContent = t('csv_total');
+  document.getElementById('csv-country').textContent = t('csv_country');
+  document.getElementById('csv-area').textContent = t('csv_area');
+  document.getElementById('csv-province').textContent = t('csv_province');
+  document.getElementById('f-source').textContent = t('footer_source');
+  document.getElementById('f-data').textContent = t('footer_data');
+  document.getElementById('f-code').textContent = t('footer_code');
+  document.querySelectorAll('.lang-pill').forEach(function(p) {
+    p.classList.toggle('on', p.dataset.lang === LANG);
+  });
+}
+
+function setLang(lang) {
+  LANG = lang;
+  applyLang();
+}
+
+LANG = detectLang();
+applyLang();
+</script>
+</body>
+</html>

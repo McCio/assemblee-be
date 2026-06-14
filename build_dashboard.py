@@ -1253,7 +1253,17 @@ function render() {{
 (function boot() {{
   rebuildLabels();
   const params = parseHash();
-  if (params) applyState(params);
+  if (params) {{
+    applyState(params);
+  }} else {{
+    const nav = (navigator.language || '').toLowerCase();
+    const detected = ['it','en','es-cast','es-cat','es-gal','eu','de'].find(l => nav.startsWith(l))
+      || (nav.startsWith('es') ? 'es-cast' : nav.startsWith('en') ? 'en' : nav.startsWith('de') ? 'de' : nav.startsWith('eu') ? 'eu' : null);
+    if (detected && TRANSLATIONS[detected]) {{
+      LANG = detected;
+      document.documentElement.lang = LANG.startsWith('es') ? LANG.replace('es-','') : LANG;
+    }}
+  }}
   syncProgPills();
   applyLang();
   render();
