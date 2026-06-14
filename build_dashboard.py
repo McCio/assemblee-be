@@ -299,7 +299,7 @@ footer a{{color:var(--c-mid);text-decoration:none}}footer a:hover{{text-decorati
   <div style="display:flex;flex-direction:column;gap:3px">
     <span><span id="footer-fonte-label">Fonte</span>: <a href="https://www.bancaetica.it/archivio-assemblee/" target="_blank" rel="noopener">Archivio Assemblee — Banca Etica</a></span>
     <span><span id="footer-dati-label">Dati</span>: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></span>
-    <span><span id="footer-codice-label">Codice</span>: <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0</a></span>
+    <span><span id="footer-codice-label">Codice</span>: <a href="https://github.com/McCio/assemblee-be" target="_blank" rel="noopener">GitHub</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0</a></span>
   </div>
   <span class="made-by" id="footer-made-by">Fatto con ♥️ da Marco Ciotola 🧠 con Claude 🤖</span>
 </footer>
@@ -827,7 +827,7 @@ function renderZones() {{
       for (const n of fn.sort()) rows+=zoneRow(n,(itA||{{}})[n]||null,(itB||{{}})[n]||null,'province-row',showA,showB,`province:${{n}}`,totA,totB);
     }}
   }}
-  if (esA||esB||geoA.spagna!=null||geoB.spagna!=null) {{
+  if (!filter&&(esA||esB||geoA.spagna!=null||geoB.spagna!=null)) {{
     const allEs=[...new Set([...Object.keys(esA||{{}}), ...Object.keys(esB||{{}})])].sort();
     rows+=sectionDataRow(t('spagna_fiare'),withGeoVot(sumZones(esA||{{}},Object.keys(esA||{{}})),geoA.spagna??null),withGeoVot(sumZones(esB||{{}},Object.keys(esB||{{}})),geoB.spagna??null),showA,showB,'es-total:',COLOR_B,totA,totB);
     for (const n of allEs) rows+=zoneRow(n,(esA||{{}})[n]||null,(esB||{{}})[n]||null,'area-row',showA,showB,`fiare:${{n}}`,totA,totB);
