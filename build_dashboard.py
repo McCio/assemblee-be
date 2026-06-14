@@ -229,7 +229,7 @@ tr.pie-hover td{{background:color-mix(in srgb,var(--c-dark) 8%,transparent)}}
 
 .zone-search{{padding:4px 8px;border:1px solid #ccc;border-radius:6px;font-size:.82rem;width:180px}}
 .sel-label{{font-size:.85rem;color:var(--c-dark);font-weight:600;padding:4px 8px;background:color-mix(in srgb,var(--c-dark) 8%,transparent);border-radius:6px;display:inline-flex;align-items:center}}
-.cats{{display:grid;gap:16px}}.cats>.card{{min-width:0}}
+.cats{{display:flex;flex-wrap:wrap;gap:16px}}.cats>.card{{flex:1 1 460px;min-width:0}}
 .zone-unavail{{color:#aaa;font-style:italic;font-size:.85rem;padding:8px}}
 .prog-controls{{display:flex;gap:8px;align-items:center;margin-bottom:10px;font-size:.85rem}}
 .lang-bar{{display:flex;gap:4px;align-items:center;flex-wrap:wrap}}
@@ -256,9 +256,11 @@ footer a{{color:var(--c-mid);text-decoration:none}}footer a:hover{{text-decorati
   </div>
 </div>
 <div id="filter-row" class="toolbar filter-row">
-  <span id="pill-genre"     class="pill on" onclick="togglePill('genre')">Donne/Uomini</span>
-  <span id="pill-tipologia" class="pill on" onclick="togglePill('tipologia')">Pers. fisiche/giuridiche</span>
-  <span id="pill-mode"      class="pill on" onclick="togglePill('mode')">Presenza/Distanza</span>
+  <span style="display:inline-flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <span id="pill-genre"     class="pill on" onclick="togglePill('genre')">Donne/Uomini</span>
+    <span id="pill-tipologia" class="pill on" onclick="togglePill('tipologia')">Pers. fisiche/giuridiche</span>
+    <span id="pill-mode"      class="pill on" onclick="togglePill('mode')">Presenza/Distanza</span>
+  </span>
   <span id="sel-label" class="sel-label" style="display:none"></span>
 </div>
 <div class="card" id="prog-card">
