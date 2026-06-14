@@ -828,7 +828,7 @@ function renderZones() {{
   if (esA||esB||geoA.spagna!=null||geoB.spagna!=null) {{
     const allEs=[...new Set([...Object.keys(esA||{{}}), ...Object.keys(esB||{{}})])].sort();
     rows+=sectionDataRow(t('spagna_fiare'),withGeoVot(sumZones(esA||{{}},Object.keys(esA||{{}})),geoA.spagna??null),withGeoVot(sumZones(esB||{{}},Object.keys(esB||{{}})),geoB.spagna??null),showA,showB,'es-total:',COLOR_B,totA,totB);
-    for (const n of allEs) rows+=zoneRow(n,(esA||{{}})[n]||null,(esB||{{}})[n]||null,'province-row',showA,showB,`fiare:${{n}}`,totA,totB);
+    for (const n of allEs) rows+=zoneRow(n,(esA||{{}})[n]||null,(esB||{{}})[n]||null,'area-row',showA,showB,`fiare:${{n}}`,totA,totB);
   }}
   const estA=(RAW[kA]||{{}}).geography?.estero??null;
   const estB=(RAW[kB]||{{}}).geography?.estero??null;
